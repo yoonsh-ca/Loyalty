@@ -69,7 +69,119 @@ app.get('/api/customer', async (req, res) => {
   }
 });
 
-// 서버 실행
+// API EndPoint: Update Coupon Status
+app.post('/api/coupon/update', async (req, res) => {
+  try {
+    const { pageId, couponId } = req.body;
+    if (!pageId || !couponId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Page ID and coupon ID are required.',
+      });
+    }
+
+    console.log('Getting data from Notion...');
+
+    const page = await notion.pages.retrieve({ page_id: pageId });
+
+    console.log('Finish getting data.');
+
+    const couponProp = page.properties?.Coupons;
+
+    if (!couponProp) {
+      return res.status(404).json({
+        success: false,
+        message: 'Coupons property not found on page.',
+      });
+    }
+
+    const richTextArr = couponProp.rich_text || [];
+    if (richTextArr.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Coupons property is empty.' });
+    }
+
+    let couponText = richTextArr.map((rt) => rt.plain_text).join('');
+    // 스마트 따옴표 / 후행 콤마 제거
+    couponText = couponText
+      .replace(/[“”«»„]/g, '"')
+      .replace(/,\s*([\]\}])/g, '$1')
+      .trim();
+    let parsed;
+
+    try {
+      parsed = JSON.parse(couponText);
+    } catch (e) {
+      console.error('JSON parse error:', e);
+
+      return res.status(400).json({
+        success: false,
+        message: 'Failed to parse coupon JSON from Notion.',
+        error: e.message,
+        raw: couponText.slice(0, 1000),
+      });
+    }
+
+    const couponsArray = Array.isArray(parsed) ? parsed : parsed?.coupons;
+    if (!Array.isArray(couponsArray)) {
+      return res.status(400).json({
+        success: false,
+        message:
+          'Coupon JSON does not contain an array. Expected array or { coupons: [...] }.',
+      });
+    }
+
+    const targetId = Number(couponId);
+    let found = false;
+    const updatedArray = couponsArray.map((c) => {
+      if (Number(c.id) === targetId) {
+        found = true;
+        return { ...c, used: true };
+      }
+
+      return c;
+    });
+
+    if (!found) {
+      return res.status(404).json({
+        success: false,
+        message: 'Coupon not found in the stored list.',
+      });
+    }
+
+    const updatedPayload = Array.isArray(parsed)
+      ? updatedArray
+      : { ...parsed, coupons: updatedArray };
+    const updatedString = JSON.stringify(updatedPayload);
+
+    await notion.pages.update({
+      page_id: pageId,
+      properties: {
+        Coupons: {
+          rich_text: [
+            {
+              type: 'text',
+              text: { content: updatedString },
+            },
+          ],
+        },
+      },
+    });
+
+    res.json({ success: true, message: 'Coupon status updated successfully.' });
+  } catch (error) {
+    console.error('Coupon Update Error:', error);
+    console.error(error.stack);
+    res.status(500).json({
+      success: false,
+      message: 'Server error has occurred while updating the coupon.',
+      error: error.message,
+    });
+  }
+});
+
+// Server
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
