@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Barcode from 'react-barcode';
 import CouponCard from '../components/CouponCard';
@@ -8,6 +8,7 @@ export default function Home() {
   const location = useLocation();
   const [customer, setCustomer] = useState(null);
   const [coupons, setCoupons] = useState([]);
+  const navigate = useNavigate();
 
   // initial data listener
   useEffect(() => {
@@ -17,6 +18,11 @@ export default function Home() {
       setCoupons(initialCoupons);
     }
   }, [location.state]);
+
+  const handleLogout = () => {
+    setCustomer(null);
+    navigate('/');
+  };
 
   const handleUseCoupon = (couponId) => {
     console.log(`Home, Clicked the coupon use button: ${couponId}`);
@@ -33,7 +39,7 @@ export default function Home() {
   if (!customer) {
     return (
       <div>
-        <Navbar />
+        <Navbar customer={customer} onLogout={handleLogout} />
         <h1>Welcom to K-town in Edmonton!</h1>
         <button>Event</button>
         <button>Location</button>
@@ -47,7 +53,7 @@ export default function Home() {
 
   return (
     <div>
-      <Navbar />
+      <Navbar customer={customer} onLogout={handleLogout} />
       <h1>Hello, {customer.name}!</h1>
       <p>{customer.tier}</p>
       <p>{customer.phone}</p>

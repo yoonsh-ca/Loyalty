@@ -54,7 +54,7 @@ export default function Login() {
       <h1>K-Town Customer Loyalty</h1>
       <form onSubmit={handleSubmit}>
         <div>
-          =<label htmlFor='name'>First Name</label>
+          <label htmlFor='name'>First Name</label>
           <input
             type='text'
             id='name'
