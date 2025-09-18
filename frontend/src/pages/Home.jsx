@@ -1,52 +1,77 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Barcode from 'react-barcode';
+import CouponCard from '../components/CouponCard';
 
 export default function Home() {
   const location = useLocation();
-  const customer = location.state?.customer;
+  const [customer, setCustomer] = useState(null);
+  const [coupons, setCoupons] = useState([]);
 
-  if (customer) {
-    const coupons = customer.coupons[0].coupons;
-    const availableCoupons = coupons.filter((coupon) => !coupon.used);
+  // initial data listener
+  useEffect(() => {
+    if (location.state?.customer) {
+      setCustomer(location.state.customer);
+      const initialCoupons = location.state.customer.coupons[0].coupons;
+      setCoupons(initialCoupons);
+    }
+  }, [location.state]);
 
+  const handleUseCoupon = (couponId) => {
+    console.log(`Home, Clicked the coupon use button: ${couponId}`);
+
+    const nextCoupons = coupons.map((coupon) => {
+      if (coupon.id === couponId) {
+        return { ...coupon, used: true };
+      }
+      return coupon;
+    });
+    setCoupons(nextCoupons);
+  };
+
+  if (!customer) {
     return (
       <div>
         <Navbar />
-        <h1>Hello, {customer.name}!</h1>
-        <p>{customer.tier}</p>
-        <p>{customer.phone}</p>
-        {customer.phone && (
-          <div>
-            <p>Barcode</p>
-            <Barcode value={customer.phone} />
-          </div>
-        )}
-
-        <p>Available Coupons</p>
-        {availableCoupons.length > 0 ? (
-          <ul>
-            {availableCoupons.map((coupon) => (
-              <li key={coupon.id}>
-                <h3>{coupon.name}</h3>
-              </li>
-            ))}
-          </ul>
-        ) : (
-          <p>There's no available coupon.</p>
-        )}
+        <h1>Welcom to K-town in Edmonton!</h1>
+        <button>Event</button>
+        <button>Location</button>
+        <button>Instagram</button>
+        <button>TikTok</button>
       </div>
     );
   }
 
+  const availableCoupons = coupons.filter((coupon) => !coupon.used);
+
   return (
     <div>
-      <h1>Welcom to K-town in Edmonton!</h1>
-      <button>Event</button>
-      <button>Location</button>
-      <button>Instagram</button>
-      <button>TikTok</button>
+      <Navbar />
+      <h1>Hello, {customer.name}!</h1>
+      <p>{customer.tier}</p>
+      <p>{customer.phone}</p>
+      {customer.phone && (
+        <div>
+          <p>Barcode</p>
+          <Barcode value={customer.phone} />
+        </div>
+      )}
+
+      <p>Available Coupons</p>
+      {availableCoupons.length > 0 ? (
+        <ul>
+          {availableCoupons.map((coupon) => (
+            <CouponCard
+              key={coupon.id}
+              coupon={coupon}
+              onUseCoupon={handleUseCoupon}
+            />
+          ))}
+        </ul>
+      ) : (
+        <p>There's no available coupon.</p>
+      )}
     </div>
   );
 }
