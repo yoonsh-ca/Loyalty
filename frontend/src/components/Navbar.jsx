@@ -12,20 +12,26 @@ export default function Navbar({ customer, onLogout }) {
   return (
     <nav>
       {/* TODO: Add pop-up? dropdown menu feat, and change to hamburger icon */}
-      <div>Menu</div>
+      {customer && (
+        <div>
+          <Link to={'/benefits'}>Benefits</Link>
+          <Link to={'/events'}>Events</Link>
+          <Link to={'/location'}>Location</Link>
+          <Link to={'/sns'}>SNS</Link>
+          <Link to={'/faq'}>FAQ</Link>
+        </div>
+      )}
 
       {/* TODO: Change to K-Town logo */}
       <div>
-        <Link to='/'>K-Town</Link>
+        <Link to='/home'>K-Town</Link>
       </div>
 
       <div>
         {customer ? (
           <button onClick={handleLogout}>Log Out</button>
         ) : (
-          <button>
-            <Link to='/'>Log In</Link>
-          </button>
+          <Link to='/'>Log In</Link>
         )}
       </div>
     </nav>
