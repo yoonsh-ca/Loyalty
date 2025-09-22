@@ -50,7 +50,13 @@ export default function Home() {
     );
   }
 
-  const availableCoupons = coupons.filter((coupon) => !coupon.used);
+  const availableCoupons = coupons.filter((coupon) => {
+    const today = new Date();
+    const expiryDate = new Date(coupon.expiryDate);
+
+    return !coupon.used && expiryDate >= today;
+  });
+  console.log(availableCoupons);
 
   return (
     <div>
