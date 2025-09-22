@@ -21,6 +21,7 @@ export default function Home() {
 
   const handleLogout = () => {
     setCustomer(null);
+    sessionStorage.removeItem('customer');
     navigate('/');
   };
 

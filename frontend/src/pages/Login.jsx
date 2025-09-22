@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
@@ -6,7 +6,15 @@ export default function Login() {
   const [phone, setPhone] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const customerData = sessionStorage.getItem('customer');
+    if (customerData) {
+      console.log('Redirect: sessionStorage already have customer data.');
+      navigate('/home', { state: { customer: JSON.parse(customerData) } });
+    }
+  }, [navigate]);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // TODO: call Baeck-end API
@@ -37,15 +45,13 @@ export default function Login() {
       ],
     };
 
-    const isCustomerFound = true;
-
-    if (isCustomerFound) {
-      console.log('Success to look up customer data!');
+    if (name === fakeCustomerData.name && phone === fakeCustomerData.phone) {
+      console.log('Success to find customer data');
+      sessionStorage.setItem('customer', JSON.stringify(fakeCustomerData));
       navigate('/home', { state: { customer: fakeCustomerData } });
     } else {
-      console.log(`No data`);
-      navigate('/');
-      alert(`There's no entered data`);
+      console.log('Cannot find customer data');
+      alert('There is no entered data');
     }
   };
 
