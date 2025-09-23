@@ -1,28 +1,15 @@
 require('dotenv').config();
 const express = require('express');
 const { Client } = require('@notionhq/client');
-const cors = require('cors');
-
-const app = express();
-const port = process.env.PORT || 3001;
-
-// CORS & JSON 설정
-app.use(cors());
-app.use(express.json());
+const router = express.Router();
 
 // Notion 클라이언트 초기화
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
-
-// env 변수 확인 (디버깅용)
-const databaseId = process.env.NOTION_DATABASE_ID;
-const dataSourceId = process.env.NOTION_DATA_SOURCE_ID;
-console.log('Database ID:', databaseId);
-console.log('Data Source ID:', dataSourceId);
+const dataSourceId = process.env.NOTION_CUSTOMER_DB_SOURCE_ID;
 
 // API EndPoint: Lookup specific customer
-app.get('/api/customer', async (req, res) => {
+router.get('/customer', async (req, res) => {
   try {
-    console.log('API call received.');
     const { name, phone } = req.query;
 
     if (!name || !phone) {
@@ -31,8 +18,6 @@ app.get('/api/customer', async (req, res) => {
         message: 'Name and phone are required.',
       });
     }
-
-    console.log('Querying Notion with:', { name, phone });
 
     const response = await notion.dataSources.query({
       data_source_id: dataSourceId,
@@ -70,7 +55,7 @@ app.get('/api/customer', async (req, res) => {
 });
 
 // API EndPoint: Update Coupon Status
-app.post('/api/coupon/update', async (req, res) => {
+router.post('/coupon/update', async (req, res) => {
   try {
     const { pageId, couponId } = req.body;
     if (!pageId || !couponId) {
@@ -181,7 +166,4 @@ app.post('/api/coupon/update', async (req, res) => {
   }
 });
 
-// Server
-app.listen(port, () => {
-  console.log(`Server is running on http://localhost:${port}`);
-});
+module.exports = router;
