@@ -1,24 +1,20 @@
-import React from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
-export default function Navbar({ customer, onLogout }) {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    onLogout();
-    navigate('/');
-  };
+export default function Navbar() {
+  const { customer, logout } = useContext(AuthContext);
 
   return (
     <nav>
       {/* TODO: Add pop-up? dropdown menu feat, and change to hamburger icon */}
       {customer && (
         <div>
-          <Link to={'/benefits'}>Benefits</Link>
-          <Link to={'/events'}>Events</Link>
-          <Link to={'/location'}>Location</Link>
-          <Link to={'/sns'}>SNS</Link>
-          <Link to={'/faq'}>FAQ</Link>
+          <Link to='/about'>About Us</Link>
+          <Link to='/benefits'>Benefits</Link>
+          <Link to='/events'>Events</Link>
+          <Link to='/sns'>SNS</Link>
+          <Link to='/faq'>FAQ</Link>
         </div>
       )}
 
@@ -29,7 +25,7 @@ export default function Navbar({ customer, onLogout }) {
 
       <div>
         {customer ? (
-          <button onClick={handleLogout}>Log Out</button>
+          <button onClick={logout}>Log Out</button>
         ) : (
           <Link to='/'>Log In</Link>
         )}

@@ -1,29 +1,21 @@
-import React, { useEffect, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import React, { useContext, useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Barcode from 'react-barcode';
 import CouponCard from '../components/CouponCard';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Home() {
-  const location = useLocation();
-  const [customer, setCustomer] = useState(null);
+  const { customer } = useContext(AuthContext);
   const [coupons, setCoupons] = useState([]);
-  const navigate = useNavigate();
 
   // initial data listener
   useEffect(() => {
-    if (location.state?.customer) {
-      setCustomer(location.state.customer);
-      const initialCoupons = location.state.customer.coupons[0].coupons;
+    if (customer) {
+      const initialCoupons = customer.coupons[0].coupons;
       setCoupons(initialCoupons);
     }
-  }, [location.state]);
-
-  const handleLogout = () => {
-    setCustomer(null);
-    sessionStorage.removeItem('customer');
-    navigate('/');
-  };
+  }, [customer]);
 
   const handleUseCoupon = (couponId) => {
     console.log(`Home, Clicked the coupon use button: ${couponId}`);
@@ -40,12 +32,13 @@ export default function Home() {
   if (!customer) {
     return (
       <div>
-        <Navbar customer={customer} onLogout={handleLogout} />
+        <Navbar />
         <h1>Welcom to K-town in Edmonton!</h1>
-        <button>Event</button>
-        <button>Location</button>
-        <button>Instagram</button>
-        <button>TikTok</button>
+        <Link to='/about'>About us</Link>
+        <Link to='/benefits'>Benefits</Link>
+        <Link to='/event'>Event</Link>
+        <Link to='/sns'>Our SNS</Link>
+        <Link to='/faq'>FAQ</Link>
       </div>
     );
   }
@@ -56,11 +49,10 @@ export default function Home() {
 
     return !coupon.used && expiryDate >= today;
   });
-  console.log(availableCoupons);
 
   return (
     <div>
-      <Navbar customer={customer} onLogout={handleLogout} />
+      <Navbar />
       <h1>Hello, {customer.name}!</h1>
       <p>{customer.tier}</p>
       <p>{customer.phone}</p>

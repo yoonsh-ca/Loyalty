@@ -1,18 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../context/AuthContext';
 
 export default function Login() {
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const { login } = useContext(AuthContext);
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const customerData = sessionStorage.getItem('customer');
-    if (customerData) {
-      console.log('Redirect: sessionStorage already have customer data.');
-      navigate('/home', { state: { customer: JSON.parse(customerData) } });
-    }
-  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -46,11 +40,9 @@ export default function Login() {
     };
 
     if (name === fakeCustomerData.name && phone === fakeCustomerData.phone) {
-      console.log('Success to find customer data');
-      sessionStorage.setItem('customer', JSON.stringify(fakeCustomerData));
-      navigate('/home', { state: { customer: fakeCustomerData } });
+      login(fakeCustomerData);
+      navigate('/home');
     } else {
-      console.log('Cannot find customer data');
       alert('There is no entered data');
     }
   };
