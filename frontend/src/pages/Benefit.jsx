@@ -1,5 +1,6 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
+import Navbar from '../components/Navbar';
 
 export default function Benefit() {
   const [benefits, setBenefits] = useState([]);
@@ -33,6 +34,7 @@ export default function Benefit() {
 
   return (
     <div>
+      <Navbar />
       <div>
         <h1>Benefits by Tier</h1>
         {benefits.length > 0 ? (

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import Navbar from '../components/Navbar';
 
 export default function Faq() {
   const [faqs, setFaqs] = useState([]);
@@ -34,6 +35,7 @@ export default function Faq() {
 
   return (
     <div>
+      <Navbar />
       <h1>FAQ</h1>
       {faqs.length > 0 ? (
         faqs.map((faq) => (

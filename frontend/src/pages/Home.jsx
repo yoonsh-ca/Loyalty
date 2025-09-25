@@ -36,7 +36,7 @@ export default function Home() {
         <h1>Welcom to K-town in Edmonton!</h1>
         <Link to='/about'>About us</Link>
         <Link to='/benefits'>Benefits</Link>
-        <Link to='/event'>Event</Link>
+        <Link to='/events'>Event</Link>
         <Link to='/sns'>Our SNS</Link>
         <Link to='/faq'>FAQ</Link>
       </div>

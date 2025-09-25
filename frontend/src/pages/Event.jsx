@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import EventCard from '../components/EventCard';
+import Navbar from '../components/Navbar';
 
 export default function Event() {
   const [events, setEvents] = useState([]);
@@ -45,6 +46,7 @@ export default function Event() {
 
   return (
     <div>
+      <Navbar />
       <h1>Events</h1>
       <div>
         <button
