@@ -11,7 +11,7 @@ import About from './pages/About';
 
 function App() {
   return (
-    <Router basename='/loyalty'>
+    <Router basename='/edmonton/loyalty'>
       <AuthProvider>
         <Routes>
           <Route path='/' element={<Login />} />
