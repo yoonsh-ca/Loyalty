@@ -26,6 +26,7 @@ router.get('/', async (req, res) => {
       return {
         question: page.properties.question.title[0]?.plain_text || '',
         answer: page.properties.answer.rich_text[0]?.plain_text || '',
+        category: page.properties.category?.select?.name || 'etc',
       };
     });
 
