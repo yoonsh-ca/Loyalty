@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const { Client } = require('@notionhq/client');
 const router = express.Router();
+const { parseCouponRichText } = require('../utils/couponParser');
 
 // Notion 클라이언트 초기화
 const notion = new Client({ auth: process.env.NOTION_API_KEY });
@@ -24,11 +25,11 @@ router.get('/customer', async (req, res) => {
       filter: {
         and: [
           {
-            property: 'Name',
+            property: 'name',
             title: { equals: name },
           },
           {
-            property: 'PhoneNumber',
+            property: 'phone_number',
             phone_number: { equals: phone },
           },
         ],
@@ -36,8 +37,25 @@ router.get('/customer', async (req, res) => {
     });
 
     if (response.results.length > 0) {
+      const customerPage = response.results[0];
+      const couponProp = customerPage.properties?.coupons;
+
+      const parsedCoupons = parseCouponRichText(couponProp?.rich_text);
+      console.log(parsedCoupons);
+
+      const customerData = {
+        pageId: customerPage.id,
+        name: customerPage.properties.name.title[0]?.plain_text || '',
+        phone_number: customerPage.properties.phone_number.phone_number || '',
+        email: customerPage.properties.email.email || '',
+        purchase_amount: customerPage.properties.purchase_amount?.number || 0,
+        tier: customerPage.properties.tier.formula?.string || '',
+        coupons: parsedCoupons,
+      };
+
       console.log('Customer found.');
-      res.json({ success: true, data: response.results[0] });
+
+      res.json({ success: true, data: customerData });
     } else {
       console.log('No customer found.');
       res.json({
@@ -46,7 +64,11 @@ router.get('/customer', async (req, res) => {
       });
     }
   } catch (error) {
-    console.error('API Error:', JSON.stringify(error, null, 2));
+    console.error('API Error:', error.message || error);
+    console.error(
+      'API Error Stack:',
+      error.stack || 'No stack trace available.'
+    );
     res.status(500).json({
       success: false,
       message: 'Server error has occurred.',
@@ -58,6 +80,7 @@ router.get('/customer', async (req, res) => {
 router.post('/coupon/update', async (req, res) => {
   try {
     const { pageId, couponId } = req.body;
+
     if (!pageId || !couponId) {
       return res.status(400).json({
         success: false,
@@ -65,13 +88,9 @@ router.post('/coupon/update', async (req, res) => {
       });
     }
 
-    console.log('Getting data from Notion...');
-
     const page = await notion.pages.retrieve({ page_id: pageId });
 
-    console.log('Finish getting data.');
-
-    const couponProp = page.properties?.Coupons;
+    const couponProp = page.properties?.coupons;
 
     if (!couponProp) {
       return res.status(404).json({
@@ -80,40 +99,12 @@ router.post('/coupon/update', async (req, res) => {
       });
     }
 
-    const richTextArr = couponProp.rich_text || [];
-    if (richTextArr.length === 0) {
-      return res
-        .status(400)
-        .json({ success: false, message: 'Coupons property is empty.' });
-    }
+    const couponsArray = parseCouponRichText(couponProp?.rich_text);
 
-    let couponText = richTextArr.map((rt) => rt.plain_text).join('');
-    // 스마트 따옴표 / 후행 콤마 제거
-    couponText = couponText
-      .replace(/[“”«»„]/g, '"')
-      .replace(/,\s*([\]\}])/g, '$1')
-      .trim();
-    let parsed;
-
-    try {
-      parsed = JSON.parse(couponText);
-    } catch (e) {
-      console.error('JSON parse error:', e);
-
-      return res.status(400).json({
-        success: false,
-        message: 'Failed to parse coupon JSON from Notion.',
-        error: e.message,
-        raw: couponText.slice(0, 1000),
-      });
-    }
-
-    const couponsArray = Array.isArray(parsed) ? parsed : parsed?.coupons;
     if (!Array.isArray(couponsArray)) {
       return res.status(400).json({
         success: false,
-        message:
-          'Coupon JSON does not contain an array. Expected array or { coupons: [...] }.',
+        message: 'Coupon JSON does not contain an array.',
       });
     }
 
@@ -124,7 +115,6 @@ router.post('/coupon/update', async (req, res) => {
         found = true;
         return { ...c, used: true };
       }
-
       return c;
     });
 
@@ -135,21 +125,14 @@ router.post('/coupon/update', async (req, res) => {
       });
     }
 
-    const updatedPayload = Array.isArray(parsed)
-      ? updatedArray
-      : { ...parsed, coupons: updatedArray };
+    const updatedPayload = { coupons: updatedArray };
     const updatedString = JSON.stringify(updatedPayload);
 
     await notion.pages.update({
       page_id: pageId,
       properties: {
-        Coupons: {
-          rich_text: [
-            {
-              type: 'text',
-              text: { content: updatedString },
-            },
-          ],
+        coupons: {
+          rich_text: [{ type: 'text', text: { content: updatedString } }],
         },
       },
     });

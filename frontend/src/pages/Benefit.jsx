@@ -7,7 +7,6 @@ export default function Benefit() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  console.log(benefits);
   useEffect(() => {
     const fetchBenefits = async () => {
       try {

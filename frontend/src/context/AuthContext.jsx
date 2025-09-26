@@ -19,15 +19,21 @@ export const AuthProvider = ({ children }) => {
           navigate('/home');
         }
       }
-    } catch (e) {
+    } catch (error) {
       sessionStorage.removeItem('customer');
       setCustomer(null);
     }
-  }, [navigate]);
+  }, [navigate, location]);
 
   const login = (customerData) => {
-    setCustomer(customerData);
-    sessionStorage.setItem('customer', JSON.stringify(customerData));
+    if (customerData && customerData.data) {
+      setCustomer(customerData.data);
+      sessionStorage.setItem('customer', JSON.stringify(customerData.data));
+    } else {
+      console.error('Login data is not in the expected format: ', customerData);
+      setCustomer(null);
+      sessionStorage.removeItem('customer');
+    }
   };
 
   const logout = () => {

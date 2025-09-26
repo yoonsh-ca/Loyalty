@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import { AuthContext } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 export default function Login() {
   const [name, setName] = useState('');
@@ -12,38 +13,23 @@ export default function Login() {
     e.preventDefault();
 
     // TODO: call Baeck-end API
-
-    // Dummy Data
-    const fakeCustomerData = {
-      name: 'Seonhye',
-      phone: '5875784932',
-      tier: 'Employee',
-      barcode: '5875784932',
-      coupons: [
-        {
-          coupons: [
-            {
-              id: 19482058,
-              name: '10% 할인 쿠폰',
-              used: false,
-              expiryDate: '2025-01-31',
-            },
-            {
-              id: 18932339,
-              name: '무료 배송 쿠폰',
-              used: false,
-              expiryDate: '2025-08-30',
-            },
-          ],
+    try {
+      const response = await axios.get('http://localhost:3001/api/customer', {
+        params: {
+          name: name,
+          phone: phone,
         },
-      ],
-    };
+      });
 
-    if (name === fakeCustomerData.name && phone === fakeCustomerData.phone) {
-      login(fakeCustomerData);
-      navigate('/home');
-    } else {
-      alert('There is no entered data');
+      if (response.data.success) {
+        login(response.data);
+        navigate('/home');
+      } else {
+        alert(response.data.message);
+      }
+    } catch (error) {
+      console.error('Login API Error: ', error);
+      alert('Sorry, failed to log in. Please try again.');
     }
   };
 
