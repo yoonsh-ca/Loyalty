@@ -1,3 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 브랜드 토큰(선택) */
+:root {
+  --brand-pink: #ff5aa7; /* 로고 핑크 HEX로 교체 가능 */
+  --muted-fg: #707480;
+  --page-bg: #fafafc;
+}
+html,
+body,
+#root {
+  height: 100%;
+  background: var(--page-bg);
+}
+
+@layer components {
+  .btn {
+    @apply inline-grid place-items-center h-11 px-5 rounded-xl font-semibold;
+  }
+  .btn-primary {
+    @apply btn text-white bg-brand;
+  }
+  .btn-outline {
+    @apply btn border-2 border-brand text-brand bg-white;
+  }
+  .card {
+    @apply bg-card border border-border rounded-2xl shadow-card;
+  }
+  .muted {
+    @apply text-muted-fg;
+  }
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
