@@ -8,6 +8,8 @@ import Faq from './pages/Faq';
 import Sns from './pages/Sns';
 import Event from './pages/Event';
 import About from './pages/About';
+import NotFound from './pages/NotFound';
+import Error from './pages/Error';
 
 function App() {
   return (
@@ -21,6 +23,8 @@ function App() {
           <Route path='/events' element={<Event />} />
           <Route path='/sns' element={<Sns />} />
           <Route path='/faq' element={<Faq />} />
+          <Route path='/error' element={<Error />} />
+          <Route path='*' element={<NotFound />} />
         </Routes>
       </AuthProvider>
     </Router>
