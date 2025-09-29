@@ -18,7 +18,7 @@ export default function CouponCard({ coupon, onUseCoupon }) {
   return (
     <li>
       <p>{coupon.name}</p>
-      <p>ID: {coupon.id}</p>
+      <p>Expiry Date: {coupon.expiry_date}</p>
 
       {coupon.used ? (
         <p>Used Coupon</p>
