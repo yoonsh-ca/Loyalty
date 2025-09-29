@@ -5,6 +5,7 @@
 /* 브랜드 토큰(선택) */
 :root {
   --brand-pink: #ff5aa7; /* 로고 핑크 HEX로 교체 가능 */
+  --brand-pink-rgb: 255, 90, 167;
   --muted-fg: #707480;
   --page-bg: #fafafc;
 }
