@@ -81,22 +81,24 @@ export default function Event() {
           </div>
 
           {/* 설명 + Refresh */}
-          <p className='muted max-w-3xl text-base md:text-lg leading-7 md:leading-8'>
-            Check ongoing and upcoming events. Use the filter below.
-          </p>
+          <div className='flex justify-between mt-3'>
+            <p className='muted max-w-3xl text-base md:text-lg leading-7 md:leading-8'>
+              Check ongoing and upcoming events. Use the filter below.
+            </p>
 
-          <Button
-            onClick={fetchEvents}
-            variant='outline'
-            size='md'
-            startIcon={<FaRotateRight size={16} aria-hidden='true' />}
-            loading={loading}
-            loadingText='Refreshing...'
-          />
+            <Button
+              onClick={fetchEvents}
+              variant='outline'
+              size='md'
+              startIcon={<FaRotateRight size={16} aria-hidden='true' />}
+              loading={loading}
+              loadingText='Refreshing...'
+            />
+          </div>
         </div>
 
         {/* 필터 버튼 컨테이너 */}
-        <div className='mt-6 rounded-2xl border border-border bg-white p-2 md:p-3 shadow-card'>
+        <div className='mt-5 rounded-2xl border border-border bg-white p-2 md:p-3 shadow-card'>
           <div
             className='grid grid-cols-4 gap-2 md:gap-3'
             role='tablist'
