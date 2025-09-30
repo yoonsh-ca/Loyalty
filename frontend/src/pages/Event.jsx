@@ -2,6 +2,7 @@ import axios from 'axios';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import EventCard from '../components/EventCard';
+import Button from '../components/ui/Button';
 import { FaRotateRight } from 'react-icons/fa6';
 
 export default function Event() {
@@ -28,7 +29,6 @@ export default function Event() {
     fetchEvents();
   }, [fetchEvents]);
 
-  // 상태별 카운트
   const counts = useMemo(() => {
     const c = { all: 0, upcoming: 0, ongoing: 0, expired: 0 };
     for (const e of events) {
@@ -55,7 +55,7 @@ export default function Event() {
     <div>
       <Navbar />
 
-      {/* 배경 워시 (은은하게) */}
+      {/* 배경 워시 */}
       <div
         className='pointer-events-none fixed inset-0 z-0 overflow-hidden'
         aria-hidden
@@ -71,41 +71,31 @@ export default function Event() {
       </div>
 
       <main className='relative z-10 container py-10 md:py-14'>
-        {/* 1) 헤더 */}
-        <h1 className='text-3xl md:text-5xl font-bold tracking-tight'>
-          Events
-        </h1>
+        <div>
+          {/* 타이틀 */}
+          <div className='inline-block max-w-[40ch]'>
+            <h1 className='text-3xl md:text-5xl font-bold tracking-tight'>
+              Events
+            </h1>
+            <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
+          </div>
 
-        {/* 2) 설명 + Refresh (한 줄 정렬) */}
-        <div className='mt-3 md:flex md:items-center md:justify-between gap-4'>
+          {/* 설명 + Refresh */}
           <p className='muted max-w-3xl text-base md:text-lg leading-7 md:leading-8'>
             Check ongoing and upcoming events. Use the filter below.
           </p>
 
-          <button
+          <Button
             onClick={fetchEvents}
-            disabled={loading}
-            aria-busy={loading}
-            className='
-              mt-3 md:mt-0
-              inline-flex items-center gap-2
-              h-10 px-4 rounded-xl
-              border border-border
-              hover:bg-gray-100 transition-colors
-              disabled:opacity-60 disabled:cursor-not-allowed
-            '
-          >
-            {/* ✅ 로딩 중 회전 */}
-            <FaRotateRight
-              size={16}
-              aria-hidden='true'
-              className={loading ? 'animate-spin' : ''}
-            />
-            <span>{loading ? 'Refreshing...' : 'Refresh'}</span>
-          </button>
+            variant='outline'
+            size='md'
+            startIcon={<FaRotateRight size={16} aria-hidden='true' />}
+            loading={loading}
+            loadingText='Refreshing...'
+          />
         </div>
 
-        {/* 3) 버튼 컨테이너(디자인 적용) */}
+        {/* 필터 버튼 컨테이너 */}
         <div className='mt-6 rounded-2xl border border-border bg-white p-2 md:p-3 shadow-card'>
           <div
             className='grid grid-cols-4 gap-2 md:gap-3'
@@ -120,35 +110,33 @@ export default function Event() {
             ].map(({ key, label, count }) => {
               const active = filterStatus === key;
               return (
-                <button
+                <Button
                   key={key}
+                  onClick={() => setFilterStatus(key)}
+                  variant={active ? 'primary' : 'outline'}
+                  size='md'
+                  className='h-10'
                   role='tab'
                   aria-selected={active}
-                  onClick={() => setFilterStatus(key)}
-                  className={[
-                    'h-10 rounded-lg px-3 text-sm font-medium transition-colors',
-                    active
-                      ? 'bg-brand text-white'
-                      : 'border border-border bg-white hover:bg-gray-100',
-                  ].join(' ')}
                 >
-                  <span>{label}</span>
-                  <span
-                    className={
-                      active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
-                    }
-                  >
-                    {count}
-                  </span>
-                </button>
+                  <>
+                    <span>{label}</span>
+                    <span
+                      className={
+                        active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
+                      }
+                    >
+                      {count}
+                    </span>
+                  </>
+                </Button>
               );
             })}
           </div>
         </div>
 
-        {/* 4) 이벤트 카드 목록 (컨테이너 디자인 없음) */}
+        {/* 이벤트 카드 목록 */}
         <div className='mt-6'>
-          {/* 로딩 스켈레톤 */}
           {loading && (
             <div className='grid gap-6 md:grid-cols-2 lg:grid-cols-3'>
               {[...Array(3)].map((_, i) => (
@@ -161,14 +149,23 @@ export default function Event() {
             </div>
           )}
 
-          {/* 에러 */}
           {!loading && error && (
-            <div className='rounded-xl border border-danger/30 bg-red-50 px-4 py-3 text-danger'>
-              {error}
+            <div>
+              <div className='rounded-xl border border-danger/30 bg-red-50 px-4 py-3 text-danger'>
+                {error}
+              </div>
+              <Button
+                onClick={fetchEvents}
+                variant='outline'
+                size='md'
+                startIcon={<FaRotateRight size={16} aria-hidden='true' />}
+                className='mt-4'
+              >
+                Retry
+              </Button>
             </div>
           )}
 
-          {/* 정상 */}
           {!loading && !error && (
             <>
               {filteredEvents.length > 0 ? (

@@ -33,17 +33,17 @@ export default function EventCard({ event }) {
   return (
     <article className='p-6 rounded-xl border border-border bg-white shadow-card hover:shadow-md transition-shadow h-full'>
       <div className='flex flex-col h-full'>
+        <span
+          className={`inline-grid place-items-center h-7 px-3 mb-3 rounded-full text-xs font-medium self-start ${badge}`}
+        >
+          {upper || 'UNKNOWN'}
+        </span>
+
         <h2 className='text-lg font-semibold leading-6'>{title}</h2>
 
         <p className='muted mt-2 text-sm min-h-[1.25rem]'>
           {periodText || '\u00A0'}
         </p>
-
-        <span
-          className={`inline-grid place-items-center h-7 px-3 mt-4 rounded-full text-xs font-medium self-start ${badge}`}
-        >
-          {upper || 'UNKNOWN'}
-        </span>
 
         {description && <p className='mt-3 text-sm leading-6'>{description}</p>}
       </div>

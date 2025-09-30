@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
+import Button from '../components/ui/Button';
 
 export default function Faq() {
   const [faqs, setFaqs] = useState([]);
@@ -26,14 +27,12 @@ export default function Faq() {
     fetchFaqs();
   }, [fetchFaqs]);
 
-  // 카테고리 목록 + 카운트
   const categories = useMemo(() => {
     const counts = { All: faqs.length };
     for (const f of faqs) {
       const c = f?.category || 'Uncategorized';
       counts[c] = (counts[c] || 0) + 1;
     }
-    // All 먼저, 나머지 알파벳 정렬
     const list = [
       'All',
       ...Object.keys(counts)
@@ -43,7 +42,6 @@ export default function Faq() {
     return { list, counts };
   }, [faqs]);
 
-  // 필터링
   const filteredFaqs = useMemo(() => {
     if (selectedCategory === 'All') return faqs;
     return faqs.filter(
@@ -71,10 +69,13 @@ export default function Faq() {
       </div>
 
       <main className='relative z-10 container py-10 md:py-14'>
-        {/* 헤더 */}
         <header>
-          <h1 className='text-3xl md:text-5xl font-bold tracking-tight'>FAQ</h1>
-          <div className='mt-3 h-1 w-32 md:w-48 bg-brand rounded-full' />
+          <div className='inline-block max-w-[40ch]'>
+            <h1 className='text-3xl md:text-5xl font-bold tracking-tight'>
+              FAQ
+            </h1>
+            <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
+          </div>
           <p className='muted mt-4 max-w-3xl text-base md:text-lg leading-7 md:leading-8'>
             Frequently asked questions. Choose a category to find answers
             faster.
@@ -91,35 +92,32 @@ export default function Faq() {
             {categories.list.map((c) => {
               const active = selectedCategory === c;
               return (
-                <button
+                <Button
                   key={c}
+                  onClick={() => setSelectedCategory(c)}
+                  variant={active ? 'primary' : 'outline'}
+                  size='md'
+                  className='h-10'
                   role='tab'
                   aria-selected={active}
-                  onClick={() => setSelectedCategory(c)}
-                  className={[
-                    'h-10 px-3 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
-                    active
-                      ? 'bg-brand text-white'
-                      : 'border border-border bg-white hover:bg-gray-100',
-                  ].join(' ')}
                 >
-                  <span>{c}</span>
-                  <span
-                    className={
-                      active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
-                    }
-                  >
-                    {categories.counts[c] ?? 0}
-                  </span>
-                </button>
+                  <>
+                    <span>{c}</span>
+                    <span
+                      className={
+                        active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
+                      }
+                    >
+                      {categories.counts[c] ?? 0}
+                    </span>
+                  </>
+                </Button>
               );
             })}
           </div>
         </section>
 
-        {/* 내용 영역 */}
         <section className='mt-6'>
-          {/* 로딩: 스켈레톤 */}
           {loading && (
             <div className='grid gap-4'>
               {[...Array(4)].map((_, i) => (
@@ -135,22 +133,22 @@ export default function Faq() {
             </div>
           )}
 
-          {/* 에러 */}
           {!loading && error && (
             <div>
               <div className='rounded-xl border border-danger/30 bg-red-50 px-4 py-3 text-danger'>
                 {error}
               </div>
-              <button
+              <Button
                 onClick={fetchFaqs}
-                className='mt-4 inline-grid place-items-center h-11 px-5 rounded-xl border border-border hover:bg-gray-100 transition-colors'
+                variant='outline'
+                size='md'
+                className='mt-4'
               >
                 Retry
-              </button>
+              </Button>
             </div>
           )}
 
-          {/* 정상 */}
           {!loading && !error && (
             <>
               {filteredFaqs.length > 0 ? (
@@ -172,12 +170,10 @@ export default function Faq() {
                           <span className='text-base md:text-lg font-medium leading-6'>
                             Q. {faq.question}
                           </span>
-                          {/* 화살표 */}
                           <svg
                             className='mt-1 h-5 w-5 shrink-0 transition-transform duration-200 group-open:rotate-180'
                             viewBox='0 0 20 20'
                             fill='currentColor'
-                            aria-hidden='true'
                           >
                             <path
                               fillRule='evenodd'
@@ -186,7 +182,6 @@ export default function Faq() {
                             />
                           </svg>
                         </summary>
-
                         <div className='px-4 pb-4 md:px-5 md:pb-5'>
                           <p className='text-sm md:text-base leading-7 whitespace-pre-line break-words'>
                             {faq.answer}

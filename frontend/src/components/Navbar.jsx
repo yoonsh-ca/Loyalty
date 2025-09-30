@@ -1,6 +1,7 @@
 import React, { useContext, useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import Button from './ui/Button';
 import logo from '../assets/logo.png';
 
 const navItems = [
@@ -14,11 +15,16 @@ const navItems = [
 export default function Navbar() {
   const { customer, logout } = useContext(AuthContext);
   const [open, setOpen] = useState(false);
+  const location = useLocation();
 
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(path + '/');
+
+  // 모바일용 기존 클래스 유지 (언더라인 효과)
   const linkBase =
-    'group relative px-4 py-2 rounded-lg transition-colors duration-200';
-  const linkIdle = 'text-black hover:text-brand hover:bg-gray-100';
-  const linkActive = 'text-brand after:opacity-100 after:scale-x-100';
+    'group relative px-4 py-2 rounded-lg transition-colors duration-200 focus-thin';
+  const linkIdle = 'text-black hover:text-brand hover:bg-gray-200';
+  const linkActiveMobile = 'text-brand after:opacity-100 after:scale-x-100';
   const linkUnderline =
     "after:content-[''] after:absolute after:left-2 after:right-2 after:-bottom-1 " +
     'after:h-0.5 after:bg-brand after:rounded-full after:transition-transform after:duration-200 ' +
@@ -29,12 +35,12 @@ export default function Navbar() {
       <nav
         className='
           container h-16 md:h-20 grid items-center
-          grid-cols-[auto_1fr_auto]          /* 모바일: 로고 | 빈공간 | 햄버거 */
-          md:grid-cols-[auto_max-content_1fr] /* 데스크탑: 로고 | 메뉴(폭만큼) | 남는폭 */
+          grid-cols-[auto_1fr_auto]
+          md:grid-cols-[auto_max-content_1fr]
           md:gap-x-4
         '
       >
-        {/* 로고: 항상 왼쪽 */}
+        {/* 로고 */}
         <div className='justify-self-start'>
           <Link to={customer ? '/home' : '/'}>
             <img
@@ -45,48 +51,42 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* 메뉴: 데스크탑에서 로고 옆에 살짝 붙여 배치 */}
-        <div className='hidden md:flex items-center justify-start md:pl-6 divide-x divide-border rounded-xl'>
+        {/* 데스크탑 메뉴: Button 컴포넌트 사용 */}
+        <div className='hidden md:flex items-center justify-start md:pl-6 gap-1'>
           {customer &&
-            navItems.map((i) => (
-              <NavLink
-                key={i.to}
-                to={i.to}
-                className={({ isActive }) =>
-                  [
-                    linkBase,
-                    linkUnderline,
-                    isActive ? linkActive : linkIdle,
-                  ].join(' ')
-                }
-              >
-                {i.label}
-              </NavLink>
-            ))}
+            navItems.map((i) => {
+              const active = isActive(i.to);
+              return (
+                <Button
+                  key={i.to}
+                  as='link'
+                  to={i.to}
+                  size='md'
+                  variant={active ? 'primary' : 'ghost'}
+                  className={active ? 'shadow-sm' : 'hover:text-brand'}
+                >
+                  {i.label}
+                </Button>
+              );
+            })}
         </div>
 
-        {/* 오른쪽: 모바일=햄버거 / 데스크탑=로그아웃 */}
+        {/* 우측 영역: 모바일 햄버거 / 데스크탑 로그아웃 */}
         <div className='justify-self-end flex items-center gap-3 md:gap-4'>
           {customer ? (
             <>
-              {/* 모바일 햄버거: 테두리 제거, 호버만 회색 */}
+              {/* 모바일 햄버거 (유지) */}
               <button
                 className='
-                  md:hidden inline-grid place-items-center h-10 w-10 rounded-xl
-                  transition-colors duration-200 hover:bg-gray-100
+                  md:hidden inline-grid place-items-center h-12 w-12 rounded-xl
+                  transition-colors duration-200 hover:bg-gray-200
                   focus-thin
                 '
                 aria-label='Toggle menu'
                 aria-expanded={open}
                 onClick={() => setOpen((v) => !v)}
               >
-                <svg
-                  width='22'
-                  height='22'
-                  viewBox='0 0 24 24'
-                  fill='none'
-                  aria-hidden='true'
-                >
+                <svg width='22' height='22' viewBox='0 0 24 24' fill='none'>
                   <path
                     d='M4 7h16M4 12h16M4 17h16'
                     stroke='currentColor'
@@ -96,39 +96,25 @@ export default function Navbar() {
                 </svg>
               </button>
 
-              {/* 데스크탑 로그아웃 */}
-              <button
+              {/* 데스크탑 로그아웃도 Button으로 통일 */}
+              <Button
                 onClick={logout}
-                className='
-                  hidden md:inline-grid place-items-center
-                  h-10 md:h-11 lg:h-12 px-4 md:px-5 rounded-xl
-                  border-2 border-brand text-brand font-semibold
-                  transition-colors duration-200
-                  hover:bg-brand hover:text-white
-                  focus:outline-none focus:ring-4 focus:ring-brand/20
-                '
+                variant='outline'
+                size='md'
+                className='hidden md:inline-flex'
               >
                 Log Out
-              </button>
+              </Button>
             </>
           ) : (
-            <Link
-              to='/'
-              className='
-                inline-grid place-items-center
-                h-10 md:h-11 lg:h-12 px-4 md:px-5 rounded-xl
-                bg-brand text-white font-semibold
-                transition-colors duration-200 hover:opacity-90
-                focus:outline-none focus:ring-4 focus:ring-brand/20
-              '
-            >
+            <Button as='link' to='/' variant='primary' size='md'>
               Log In
-            </Link>
+            </Button>
           )}
         </div>
       </nav>
 
-      {/* 모바일 드롭다운: 로그아웃 최상단 + 부드러운 전환 */}
+      {/* 모바일 드롭다운: 기존 스타일 유지(언더라인 효과) */}
       <div
         className={[
           'md:hidden overflow-hidden border-t border-border',
@@ -146,39 +132,37 @@ export default function Navbar() {
             ].join(' ')}
             style={{ willChange: 'transform' }}
           >
-            <button
+            <Button
               onClick={() => {
                 setOpen(false);
                 logout();
               }}
-              className='
-                inline-grid place-items-center h-10 px-4 rounded-xl
-                border-2 border-brand text-brand font-semibold
-                transition-colors duration-200
-                hover:bg-brand hover:text-white
-                focus:outline-none focus:ring-4 focus:ring-brand/20
-              '
+              variant='outline'
+              size='md'
+              fullWidth
             >
               Log Out
-            </button>
+            </Button>
 
-            {navItems.map((i) => (
-              <NavLink
-                key={i.to}
-                to={i.to}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  [
+            {/* 모바일 메뉴는 기존 언더라인 유지 */}
+            {navItems.map((i) => {
+              const active = isActive(i.to);
+              return (
+                <Link
+                  key={i.to}
+                  to={i.to}
+                  onClick={() => setOpen(false)}
+                  className={[
                     'block',
                     linkBase,
                     linkUnderline,
-                    isActive ? linkActive : linkIdle,
-                  ].join(' ')
-                }
-              >
-                {i.label}
-              </NavLink>
-            ))}
+                    active ? linkActiveMobile : linkIdle,
+                  ].join(' ')}
+                >
+                  {i.label}
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
