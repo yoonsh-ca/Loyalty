@@ -1,4 +1,3 @@
-// src/pages/Home.jsx
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
@@ -7,37 +6,59 @@ import CouponCard from '../components/CouponCard';
 import { AuthContext } from '../context/AuthContext';
 import Button from '../components/ui/Button';
 import { FaRotateRight } from 'react-icons/fa6';
+import { useNavigate } from 'react-router-dom';
 
 export default function Home() {
   const { customer, login } = useContext(AuthContext);
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState(null);
+  const navigate = useNavigate();
+
+  // New: Combine first name and last name for full display
+  const fullName = [customer?.firstName, customer?.lastName]
+    .filter(Boolean)
+    .join(' ');
 
   const fetchCustomerData = useCallback(async () => {
-    if (!customer?.phone_number || !customer?.name) return;
+    // Check using the new property name: firstName
+    if (!customer?.phone_number || !customer?.firstName) return;
 
     setLoading(true);
     setErrorMsg(null);
     try {
       const response = await axios.get('http://localhost:3001/api/customer', {
         params: {
-          name: customer.name,
+          // Send the firstName as the 'name' query parameter
+          name: customer.firstName,
           phone: customer.phone_number,
         },
       });
       if (response.data.success) {
-        login(response.data);
+        // Assuming your login context correctly updates state with new data structure (firstName, lastName)
+        login(response.data.data);
       } else {
-        setErrorMsg(response.data.message || 'Failed to refresh data.');
+        // Navigate to the centralized error page if data fetching fails
+        navigate('/error', {
+          state: {
+            message:
+              response.data.message || 'Failed to refresh customer data.',
+          },
+        });
       }
     } catch (error) {
       console.error('Failed to refresh customer data: ', error);
-      setErrorMsg('Failed to bring the latest data of customer.');
+      // Navigate to the centralized error page on network failure
+      navigate('/error', {
+        state: {
+          message:
+            'Failed to retrieve the latest customer data due to a network error.',
+        },
+      });
     } finally {
       setLoading(false);
     }
-  }, [customer, login]);
+  }, [customer, login, navigate]);
 
   // initial data listener
   useEffect(() => {
@@ -58,13 +79,18 @@ export default function Home() {
       );
 
       if (response.data.success) {
-        alert('Coupon has used!');
+        // Use custom modal or message box instead of alert()
+        console.log('Coupon has used!');
         fetchCustomerData();
       } else {
-        alert('Cannot use this coupon: ' + response.data.message);
+        // Use custom modal or message box instead of alert()
+        console.log('Cannot use this coupon: ' + response.data.message);
       }
     } catch (error) {
       console.error('Failed to update coupon status: ' + error);
+      navigate('/error', {
+        state: { message: 'Failed to update coupon status.' },
+      });
     }
 
     // optimistic UI
@@ -78,6 +104,8 @@ export default function Home() {
   const availableCoupons = coupons.filter((coupon) => {
     const today = new Date();
     const expiryDate = new Date(coupon.expiry_date);
+    // Ensure we handle invalid dates gracefully
+    if (isNaN(expiryDate)) return false;
     return !coupon.used && expiryDate >= today;
   });
 
@@ -106,10 +134,13 @@ export default function Home() {
           <>
             <header className='text-center'>
               <div className='inline-block'>
-                <h1 className='text-3xl md:text-5xl font-bold tracking-tight'>
-                  Welcome to K-Town in Edmonton!
+                <h1 className='flex gap-3 text-3xl md:text-5xl font-bold tracking-tight'>
+                  Welcome to
+                  <div>
+                    K-Town in Edmonton!
+                    <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
+                  </div>
                 </h1>
-                <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
               </div>
               <p className='muted mt-4 max-w-2xl mx-auto text-base md:text-lg leading-7 md:leading-8'>
                 Explore our store info, loyalty benefits, events and social
@@ -146,7 +177,7 @@ export default function Home() {
                 <h1 className='flex gap-2 text-3xl md:text-5xl font-bold tracking-tight'>
                   Hello,
                   <div>
-                    {customer.name}!
+                    {customer.firstName || 'Member'}! {/* Display full name */}
                     <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
                   </div>
                 </h1>
@@ -162,7 +193,7 @@ export default function Home() {
                 <div>
                   <p className='text-sm muted'>Member</p>
                   <p className='text-xl md:text-2xl font-semibold'>
-                    {customer.name}
+                    {fullName || customer.firstName} {/* Display full name */}
                   </p>
                 </div>
                 {customer.tier && (

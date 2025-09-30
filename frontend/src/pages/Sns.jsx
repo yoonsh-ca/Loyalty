@@ -52,7 +52,7 @@ export default function Sns() {
                 href='https://www.kplaytown.ca'
                 target='_blank'
                 rel='noreferrer noopener'
-                variant='primary'
+                variant='outline'
                 fullWidth
                 startIcon={<FaWebAwesome size={22} aria-hidden='true' />}
               >

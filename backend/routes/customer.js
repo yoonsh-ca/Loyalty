@@ -68,11 +68,15 @@ const checkAndIssueBirthdayCoupon = async (customerData) => {
 
 router.get('/customer', async (req, res) => {
   try {
+    // 'name' query parameter now represents the first name used for login
     const { name, phone } = req.query;
     if (!name || !phone) {
       return res
         .status(400)
-        .json({ success: false, message: 'Name and phone are required.' });
+        .json({
+          success: false,
+          message: 'First name and phone are required.',
+        });
     }
 
     const normalizedPhone = normalizePhoneNumber(phone);
@@ -81,7 +85,8 @@ router.get('/customer', async (req, res) => {
       data_source_id: dataSourceId,
       filter: {
         and: [
-          { property: 'name', title: { equals: name } },
+          // Filtering by the 'first_name' property (the main Title column)
+          { property: 'first_name', title: { equals: name } },
           {
             property: 'phone_number',
             phone_number: { equals: normalizedPhone },
@@ -105,9 +110,17 @@ router.get('/customer', async (req, res) => {
     const couponsProp = customerPage.properties.coupons?.rich_text;
     const existingCoupons = parseCouponRichText(couponsProp);
 
+    // Extracting first_name and the newly added last_name
+    const firstName =
+      customerPage.properties.first_name?.title[0]?.plain_text || '';
+    const lastName =
+      customerPage.properties.last_name?.rich_text[0]?.plain_text || '';
+
     const customerData = {
       pageId: customerPage.id,
-      name: customerPage.properties.name.title[0]?.plain_text || '',
+      // Returning firstName and lastName separately
+      firstName: firstName,
+      lastName: lastName,
       phone_number: customerPage.properties.phone_number.phone_number || '',
       email: customerPage.properties.email?.email || '',
       purchase_amount: customerPage.properties.purchase_amount?.number || 0,
