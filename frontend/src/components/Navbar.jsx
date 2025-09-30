@@ -5,6 +5,7 @@ import Button from './ui/Button';
 import logo from '../assets/logo.png';
 
 const navItems = [
+  { to: '/home', label: 'My Account' },
   { to: '/about', label: 'About' },
   { to: '/benefits', label: 'Benefits' },
   { to: '/events', label: 'Events' },
@@ -99,7 +100,7 @@ export default function Navbar() {
               {/* 데스크탑 로그아웃도 Button으로 통일 */}
               <Button
                 onClick={logout}
-                variant='outline'
+                variant='primary'
                 size='md'
                 className='hidden md:inline-flex'
               >
@@ -137,7 +138,7 @@ export default function Navbar() {
                 setOpen(false);
                 logout();
               }}
-              variant='outline'
+              variant='primary'
               size='md'
               fullWidth
             >

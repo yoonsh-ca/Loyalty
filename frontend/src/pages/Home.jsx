@@ -1,20 +1,24 @@
+// src/pages/Home.jsx
 import React, { useCallback, useContext, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import Barcode from 'react-barcode';
 import CouponCard from '../components/CouponCard';
 import { AuthContext } from '../context/AuthContext';
+import Button from '../components/ui/Button';
+import { FaRotateRight } from 'react-icons/fa6';
 
 export default function Home() {
   const { customer, login } = useContext(AuthContext);
   const [coupons, setCoupons] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState(null);
 
   const fetchCustomerData = useCallback(async () => {
     if (!customer?.phone_number || !customer?.name) return;
 
     setLoading(true);
+    setErrorMsg(null);
     try {
       const response = await axios.get('http://localhost:3001/api/customer', {
         params: {
@@ -25,11 +29,11 @@ export default function Home() {
       if (response.data.success) {
         login(response.data);
       } else {
-        alert(response.data.message);
+        setErrorMsg(response.data.message || 'Failed to refresh data.');
       }
     } catch (error) {
       console.error('Failed to refresh customer data: ', error);
-      alert('Failed to bring the latest data of customer.');
+      setErrorMsg('Failed to bring the latest data of customer.');
     } finally {
       setLoading(false);
     }
@@ -43,15 +47,13 @@ export default function Home() {
   }, [customer]);
 
   const handleUseCoupon = async (couponId) => {
-    console.log(`Home, Clicked the coupon use button: ${couponId}`);
-
     try {
       const pageId = customer.pageId;
       const response = await axios.post(
         'http://localhost:3001/api/coupon/update',
         {
-          pageId: pageId,
-          couponId: couponId,
+          pageId,
+          couponId,
         }
       );
 
@@ -65,68 +67,178 @@ export default function Home() {
       console.error('Failed to update coupon status: ' + error);
     }
 
-    const nextCoupons = coupons.map((coupon) => {
-      if (coupon.id === couponId) {
-        return { ...coupon, used: true };
-      }
-      return coupon;
-    });
+    // optimistic UI
+    const nextCoupons = coupons.map((coupon) =>
+      coupon.id === couponId ? { ...coupon, used: true } : coupon
+    );
     setCoupons(nextCoupons);
   };
 
-  if (!customer) {
-    return (
-      <div>
-        <Navbar />
-        <h1>Welcom to K-town in Edmonton!</h1>
-        <Link to='/about'>About us</Link>
-        <Link to='/benefits'>Benefits</Link>
-        <Link to='/events'>Event</Link>
-        <Link to='/sns'>Our SNS</Link>
-        <Link to='/faq'>FAQ</Link>
-      </div>
-    );
-  }
-
+  // 유효/미사용 쿠폰만
   const availableCoupons = coupons.filter((coupon) => {
     const today = new Date();
     const expiryDate = new Date(coupon.expiry_date);
-
     return !coupon.used && expiryDate >= today;
   });
-  console.log(coupons, availableCoupons);
 
   return (
     <div>
       <Navbar />
-      <h1>Hello, {customer.name}!</h1>
-      <p>{customer.tier}</p>
-      <p>{customer.phone_number}</p>
-      {customer.phone_number && (
-        <div>
-          <p>Barcode</p>
-          <Barcode value={customer.phone_number} />
-        </div>
-      )}
 
-      <button onClick={fetchCustomerData}>
-        {loading ? 'Refreshing...' : 'Refresh?'}
-      </button>
+      {/* 배경 워시 */}
+      <div
+        className='pointer-events-none fixed inset-0 z-0 overflow-hidden'
+        aria-hidden
+      >
+        <div
+          className='absolute -top-28 right-[-160px] h-[420px] w-[420px] rounded-full blur-3xl'
+          style={{ backgroundColor: 'rgba(var(--brand-pink-rgb), 0.07)' }}
+        />
+        <div
+          className='absolute bottom-[-140px] -left-28 h-[360px] w-[360px] rounded-full blur-3xl'
+          style={{ backgroundColor: 'rgba(var(--brand-pink-rgb), 0.06)' }}
+        />
+      </div>
 
-      <p>Available Coupons</p>
-      {availableCoupons.length > 0 ? (
-        <ul>
-          {availableCoupons.map((coupon) => (
-            <CouponCard
-              key={coupon.id}
-              coupon={coupon}
-              onUseCoupon={handleUseCoupon}
-            />
-          ))}
-        </ul>
-      ) : (
-        <p>There's no available coupon.</p>
-      )}
+      <main className='relative z-10 container py-10 md:py-14'>
+        {/* 로그인 전: 웰컴 섹션 */}
+        {!customer && (
+          <>
+            <header className='text-center'>
+              <div className='inline-block'>
+                <h1 className='text-3xl md:text-5xl font-bold tracking-tight'>
+                  Welcome to K-Town in Edmonton!
+                </h1>
+                <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
+              </div>
+              <p className='muted mt-4 max-w-2xl mx-auto text-base md:text-lg leading-7 md:leading-8'>
+                Explore our store info, loyalty benefits, events and social
+                channels.
+              </p>
+            </header>
+
+            <section className='mt-8 grid gap-3 max-w-md mx-auto'>
+              <Button as='link' to='/about' variant='outline' fullWidth>
+                About us
+              </Button>
+              <Button as='link' to='/benefits' variant='outline' fullWidth>
+                Benefits
+              </Button>
+              <Button as='link' to='/events' variant='outline' fullWidth>
+                Events
+              </Button>
+              <Button as='link' to='/sns' variant='outline' fullWidth>
+                Our SNS
+              </Button>
+              <Button as='link' to='/faq' variant='outline' fullWidth>
+                FAQ
+              </Button>
+            </section>
+          </>
+        )}
+
+        {/* 로그인 후: 회원 섹션 */}
+        {customer && (
+          <>
+            {/* 타이틀 */}
+            <header>
+              <div className='inline-block'>
+                <h1 className='flex gap-2 text-3xl md:text-5xl font-bold tracking-tight'>
+                  Hello,
+                  <div>
+                    {customer.name}!
+                    <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
+                  </div>
+                </h1>
+              </div>
+              <p className='muted mt-4 text-base md:text-lg leading-7'>
+                Here’s your membership info and available coupons.
+              </p>
+            </header>
+
+            {/* 프로필 카드 (이름/티어) */}
+            <section className='mt-6'>
+              <div className='rounded-2xl border border-border bg-white p-5 md:p-6 shadow-card flex items-center justify-between gap-4'>
+                <div>
+                  <p className='text-sm muted'>Member</p>
+                  <p className='text-xl md:text-2xl font-semibold'>
+                    {customer.name}
+                  </p>
+                </div>
+                {customer.tier && (
+                  <div className='inline-grid place-items-center h-8 px-3 rounded-full bg-brand text-white text-sm font-medium'>
+                    {customer.tier}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* 바코드 카드 (Refresh 버튼 제거됨) */}
+            {customer.phone_number && (
+              <section className='mt-6'>
+                <div className='rounded-2xl border border-border bg-white p-5 md:p-6 shadow-card'>
+                  <div className='flex items-center justify-between'>
+                    <p className='text-base font-semibold'>
+                      Membership Barcode
+                    </p>
+                  </div>
+                  <div className='mt-4 rounded-xl border border-border bg-white p-3 overflow-auto flex justify-center md:justify-start'>
+                    <Barcode value={customer.phone_number} />
+                  </div>
+                  <p className='muted text-sm mt-3'>
+                    Show this barcode at checkout to earn points and redeem
+                    coupons.
+                  </p>
+                  {errorMsg && (
+                    <div className='mt-3 rounded-xl border border-danger/30 bg-red-50 px-4 py-3 text-danger'>
+                      {errorMsg}
+                    </div>
+                  )}
+                </div>
+              </section>
+            )}
+
+            {/* 쿠폰 섹션 (여기에 Refresh 버튼 배치) */}
+            <section className='mt-8'>
+              <div className='flex items-center justify-between'>
+                <h2 className='text-xl font-semibold'>
+                  Available Coupons
+                  <span className='ml-2 inline-grid place-items-center h-7 px-3 rounded-full bg-gray-100 text-gray-700 text-xs font-medium align-middle'>
+                    {availableCoupons.length}
+                  </span>
+                </h2>
+
+                <Button
+                  onClick={fetchCustomerData}
+                  variant='outline'
+                  size='md'
+                  startIcon={<FaRotateRight size={16} aria-hidden='true' />}
+                  loading={loading}
+                  loadingText='Refreshing...'
+                />
+              </div>
+
+              <div className='mt-4'>
+                {availableCoupons.length > 0 ? (
+                  <ul className='grid gap-4 md:grid-cols-2'>
+                    {availableCoupons.map((coupon) => (
+                      <CouponCard
+                        key={coupon.id}
+                        coupon={coupon}
+                        onUseCoupon={handleUseCoupon}
+                      />
+                    ))}
+                  </ul>
+                ) : (
+                  <div className='rounded-xl border border-border bg-white px-4 py-6'>
+                    <p className='muted'>There&apos;s no available coupon.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+          </>
+        )}
+      </main>
     </div>
   );
 }
