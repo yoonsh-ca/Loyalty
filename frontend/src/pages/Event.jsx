@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../api/axios';
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import EventCard from '../components/EventCard';
@@ -15,7 +15,7 @@ export default function Event() {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.get('http://localhost:3001/api/event');
+      const response = await axios.get('/api/event');
       setEvents(response.data || []);
     } catch (err) {
       console.error('Failed to fetch events: ', err);

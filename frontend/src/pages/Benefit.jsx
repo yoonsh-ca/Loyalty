@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from '../api/axios';
 import React, { useEffect, useState, useCallback } from 'react';
 import Navbar from '../components/Navbar';
 import Button from '../components/ui/Button';
@@ -12,7 +12,7 @@ export default function Benefit() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get('http://localhost:3001/api/benefit');
+      const res = await axios.get('/api/benefit');
       setBenefits(res.data || []);
     } catch (err) {
       console.error('Failed to fetch benefits data: ', err);

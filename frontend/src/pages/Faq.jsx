@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import Navbar from '../components/Navbar';
 import Button from '../components/ui/Button';
 
@@ -13,7 +13,7 @@ export default function Faq() {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.get('http://localhost:3001/api/faq');
+      const res = await axios.get('/api/faq');
       setFaqs(res.data || []);
     } catch (err) {
       console.error('Failed to fetch FAQs: ', err);

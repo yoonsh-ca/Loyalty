@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import Navbar from '../components/Navbar';
 import Barcode from 'react-barcode';
 import CouponCard from '../components/CouponCard';
@@ -27,7 +27,7 @@ export default function Home() {
     setLoading(true);
     setErrorMsg(null);
     try {
-      const response = await axios.get('http://localhost:3001/api/customer', {
+      const response = await axios.get('/api/customer', {
         params: {
           // Send the firstName as the 'name' query parameter
           name: customer.firstName,
@@ -70,13 +70,10 @@ export default function Home() {
   const handleUseCoupon = async (couponId) => {
     try {
       const pageId = customer.pageId;
-      const response = await axios.post(
-        'http://localhost:3001/api/coupon/update',
-        {
-          pageId,
-          couponId,
-        }
-      );
+      const response = await axios.post('/api/coupon/update', {
+        pageId,
+        couponId,
+      });
 
       if (response.data.success) {
         // Use custom modal or message box instead of alert()

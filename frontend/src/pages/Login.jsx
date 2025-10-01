@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import axios from 'axios';
+import axios from '../api/axios';
 import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import Button from '../components/ui/Button';
@@ -30,7 +30,7 @@ export default function Login() {
     setErrorMsg(null);
 
     try {
-      const response = await axios.get('http://localhost:3001/api/customer', {
+      const response = await axios.get('/api/customer', {
         params: {
           name: name.trim(),
           phone: normalizePhone(phoneRaw),
