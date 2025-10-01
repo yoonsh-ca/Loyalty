@@ -130,15 +130,15 @@ export default function Home() {
         {!customer && (
           <>
             <header className='text-center'>
-              <div className='inline-block'>
-                <h1 className='flex gap-3 text-3xl md:text-5xl font-bold tracking-tight'>
+              <span className='inline-block'>
+                <h1 className='lg:flex gap-3 text-3xl md:text-5xl font-bold tracking-tight'>
                   Welcome to
                   <div>
                     K-Town in Edmonton!
                     <div className='mt-2 h-1 md:h-[6px] bg-brand rounded-full' />
                   </div>
                 </h1>
-              </div>
+              </span>
               <p className='muted mt-4 max-w-2xl mx-auto text-base md:text-lg leading-7 md:leading-8'>
                 Explore our store info, loyalty benefits, events and social
                 channels.
@@ -211,7 +211,11 @@ export default function Home() {
                     </p>
                   </div>
                   <div className='mt-4 rounded-xl border border-border bg-white p-3 overflow-auto flex justify-center md:justify-start'>
-                    <Barcode value={customer.phone_number} />
+                    <Barcode
+                      value={customer.phone_number}
+                      background='#ffffff'
+                      lineColor='#000000'
+                    />
                   </div>
                   <p className='muted text-sm mt-3'>
                     Show this barcode at checkout to earn points.
@@ -228,7 +232,7 @@ export default function Home() {
             {/* 쿠폰 섹션 (여기에 Refresh 버튼 배치) */}
             <section className='mt-8'>
               <div className='flex items-center justify-between'>
-                <h2 className='text-xl font-semibold'>
+                <h2 className='text-lg font-semibold'>
                   Available Coupons
                   <span className='ml-2 inline-grid place-items-center h-7 px-3 rounded-full bg-gray-100 text-gray-700 text-xs font-medium align-middle'>
                     {availableCoupons.length}

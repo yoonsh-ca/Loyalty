@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/* 항상 라이트 컬러 스킴 사용 선언 */
+:root,
+html {
+  color-scheme: light;
+}
+
+/* (선택) 다크 선호 신호가 와도 라이트 유지 */
+@media (prefers-color-scheme: dark) {
+  :root,
+  html {
+    color-scheme: light;
+  }
+}
+
 /* 브랜드 토큰(선택) */
 :root {
   --brand-pink: #ff5aa7; /* 로고 핑크 HEX로 교체 가능 */
@@ -9,6 +23,7 @@
   --muted-fg: #707480;
   --page-bg: #fafafc;
 }
+
 html,
 body,
 #root {
@@ -41,9 +56,20 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background: var(--bg, #fafafc);
+  color: #111827;
 }
 
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
+}
+
+/* hide horizontal scrollbar visually (still scrollable) */
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE/Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
 }

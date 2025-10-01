@@ -98,9 +98,14 @@ export default function Event() {
         </div>
 
         {/* 필터 버튼 컨테이너 */}
-        <div className='mt-5 rounded-2xl border border-border bg-white p-2 md:p-3 shadow-card'>
+        <section className='mt-5 rounded-2xl border border-border bg-white p-2 md:p-3 shadow-card'>
           <div
-            className='grid grid-cols-4 gap-2 md:gap-3'
+            className='
+              flex gap-2 md:gap-3
+              overflow-x-auto no-scrollbar
+              snap-x snap-mandatory scroll-px-2
+              md:overflow-visible
+            '
             role='tablist'
             aria-label='Filter events by status'
           >
@@ -112,30 +117,36 @@ export default function Event() {
             ].map(({ key, label, count }) => {
               const active = filterStatus === key;
               return (
-                <Button
+                // 래퍼가 핵심: flex-1 basis-0 로 가용폭을 균등 분배, min-w 로 너무 좁으면 스크롤
+                <div
                   key={key}
-                  onClick={() => setFilterStatus(key)}
-                  variant={active ? 'primary' : 'outline'}
-                  size='md'
-                  className='h-10'
-                  role='tab'
-                  aria-selected={active}
+                  className='flex-1 basis-0 min-w-[7.5rem] snap-start'
                 >
-                  <>
-                    <span>{label}</span>
-                    <span
-                      className={
-                        active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
-                      }
-                    >
-                      {count}
-                    </span>
-                  </>
-                </Button>
+                  <Button
+                    onClick={() => setFilterStatus(key)}
+                    variant={active ? 'primary' : 'outline'}
+                    size='md'
+                    className='h-10 whitespace-nowrap w-full'
+                    role='tab'
+                    aria-selected={active}
+                    fullWidth
+                  >
+                    <>
+                      <span>{label}</span>
+                      <span
+                        className={
+                          active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
+                        }
+                      >
+                        {count}
+                      </span>
+                    </>
+                  </Button>
+                </div>
               );
             })}
           </div>
-        </div>
+        </section>
 
         {/* 이벤트 카드 목록 */}
         <div className='mt-6'>

@@ -85,33 +85,45 @@ export default function Faq() {
         {/* 카테고리 필터 컨테이너 */}
         <section className='mt-8 rounded-2xl border border-border bg-white p-2 md:p-3 shadow-card'>
           <div
-            className='grid auto-cols-max grid-flow-col gap-2 md:gap-3 overflow-x-auto no-scrollbar'
+            className='
+              /* Mobile */
+              flex gap-2 overflow-x-auto no-scrollbar
+              snap-x snap-proximity scroll-px-2
+
+              /* Desktop */
+              md:grid md:overflow-visible md:snap-none
+              md:gap-3 md:gap-y-2
+              md:grid-cols-[repeat(auto-fit,minmax(8rem,1fr))]
+            '
             role='tablist'
             aria-label='Filter FAQs by category'
           >
             {categories.list.map((c) => {
               const active = selectedCategory === c;
               return (
-                <Button
-                  key={c}
-                  onClick={() => setSelectedCategory(c)}
-                  variant={active ? 'primary' : 'outline'}
-                  size='md'
-                  className='h-10'
-                  role='tab'
-                  aria-selected={active}
-                >
-                  <>
-                    <span>{c}</span>
-                    <span
-                      className={
-                        active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
-                      }
-                    >
-                      {categories.counts[c] ?? 0}
-                    </span>
-                  </>
-                </Button>
+                // 모바일에선 min-w로 스크롤 유도, md↑에선 grid가 폭 분배
+                <div key={c} className='min-w-[8.5rem] md:min-w-0 snap-start'>
+                  <Button
+                    onClick={() => setSelectedCategory(c)}
+                    variant={active ? 'primary' : 'outline'}
+                    size='md'
+                    className='h-10 whitespace-nowrap w-full'
+                    role='tab'
+                    aria-selected={active}
+                    fullWidth
+                  >
+                    <>
+                      <span>{c}</span>
+                      <span
+                        className={
+                          active ? 'ml-2 opacity-90' : 'ml-2 text-gray-500'
+                        }
+                      >
+                        {categories.counts[c] ?? 0}
+                      </span>
+                    </>
+                  </Button>
+                </div>
               );
             })}
           </div>
@@ -183,7 +195,7 @@ export default function Faq() {
                           </svg>
                         </summary>
                         <div className='px-4 pb-4 md:px-5 md:pb-5'>
-                          <p className='text-sm md:text-base leading-7 whitespace-pre-line break-words'>
+                          <p className='text-md md:text-base leading-7 whitespace-pre-line break-words'>
                             {faq.answer}
                           </p>
                         </div>
