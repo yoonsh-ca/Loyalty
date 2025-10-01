@@ -214,8 +214,7 @@ export default function Home() {
                     <Barcode value={customer.phone_number} />
                   </div>
                   <p className='muted text-sm mt-3'>
-                    Show this barcode at checkout to earn points and redeem
-                    coupons.
+                    Show this barcode at checkout to earn points.
                   </p>
                   {errorMsg && (
                     <div className='mt-3 rounded-xl border border-danger/30 bg-red-50 px-4 py-3 text-danger'>
